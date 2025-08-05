@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Neo's Computer | Matrix WWW</title>
+    <meta name="description" content="Simulation of Neo's Computer of Matrix.">
+    <meta name="keywords" content="Matrix, Neo, código, lluvia de código, interfaz, entrenamiento, salud, simulación, The Matrix, HTML, CSS, JavaScript">
+    <meta name="author" content="Inled Group">
+    <link rel="icon" href="favicon.ico" type="image/x-icon">
+    <style>
+        /* Importamos una fuente monoespaciada para simular una terminal */
+        @import url('https://fonts.googleapis.com/css2?family=Roboto+Mono:wght@400;700&display=swap');
+
+        /* Estilos generales del cuerpo */
+        body {
+            background-color: #000;
+            color: #00ff41; /* Verde neón de Matrix */
+            font-family: 'Roboto Mono', monospace;
+            margin: 0;
+            overflow: hidden;
+        }
+        /* Efecto de monitor antiguo CRT (superposición) */
+        body::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: 
+                /* Scanlines más visibles */
+                repeating-linear-gradient(0deg, rgba(0,0,0,.2) 0, rgba(0,0,0,.2) 1px, transparent 1px, transparent 2px),
+                /* Puntos estáticos (ruido) más notables */
+                radial-gradient(circle at center, rgba(0,0,0,0) 0, rgba(0,0,0,.1) 50%, rgba(0,0,0,.3) 100%);
+            background-size: 100% 4px, 100% 100%;
+            background-blend-mode: overlay;
+            pointer-events: none;
+            z-index: 1000;
+            animation: flicker 0.2s infinite alternate;
+        }
+
+        /* Estilo para el contenedor del texto con el cursor parpadeante */
+        #matrix-text {
+            white-space: pre;
+            /* Posicionamiento en la esquina superior izquierda */
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            /* Tamaño de fuente más pequeño */
+            font-size: 1rem; 
+            border-right: 3px solid #00ff41;
+            animation: blink-caret .75s step-end infinite;
+        }
+
+        /* Animación para el cursor que parpadea */
+        @keyframes blink-caret {
+            from, to { border-color: transparent }
+            50% { border-color: #00ff41; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Contenedor donde se mostrará el texto -->
+    <div id="matrix-text"></div>
+
+    <script>
+        const textElement = document.getElementById('matrix-text');
+        
+        // Las frases icónicas de Matrix que se mostrarán en bucle
+        const phrases = [
+            "Wake up, Neo...",
+            "The Matrix has you...",
+            "Follow the white rabbit.",
+            "Knock, knock, Neo."
+        ];
+
+        let phraseIndex = 0;
+        let charIndex = 0;
+        let isDeleting = false;
+        let typingSpeed = 150; // Velocidad de escritura
+        let deletingSpeed = 75; // Velocidad de borrado
+        let pauseBetweenPhrases = 1500; // Pausa antes de borrar
+
+        /**
+         * Función principal que maneja el efecto de máquina de escribir.
+         * Se llama a sí misma de forma recursiva con un retraso.
+         */
+        function typeWriter() {
+            const currentPhrase = phrases[phraseIndex];
+            
+            if (!isDeleting) {
+                // Modo de escritura: añade un carácter
+                if (charIndex < currentPhrase.length) {
+                    textElement.textContent += currentPhrase.charAt(charIndex);
+                    charIndex++;
+                    setTimeout(typeWriter, typingSpeed);
+                } else {
+                    // Pausa cuando se termina de escribir la frase
+                    isDeleting = true;
+                    setTimeout(typeWriter, pauseBetweenPhrases);
+                }
+            } else {
+                // Modo de borrado: elimina un carácter
+                if (charIndex > 0) {
+                    textElement.textContent = currentPhrase.substring(0, charIndex - 1);
+                    charIndex--;
+                    setTimeout(typeWriter, deletingSpeed);
+                } else {
+                    // Cambia a la siguiente frase en el array
+                    isDeleting = false;
+                    phraseIndex = (phraseIndex + 1) % phrases.length;
+                    setTimeout(typeWriter, typingSpeed);
+                }
+            }
+        }
+
+        // Espera a que el documento esté completamente cargado para iniciar el efecto
+        document.addEventListener('DOMContentLoaded', () => {
+            if (textElement) {
+                setTimeout(typeWriter, 1000); // Empieza después de un segundo
+            }
+        });
+
+    </script>
+
+</body>
+</html>

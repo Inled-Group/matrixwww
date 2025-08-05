@@ -1,0 +1,186 @@
+:root {
+    --matrix-green: #00FF41;
+    --dark-green: #008F11;
+    --background-color: #0D0D0D;
+    --text-glow: 0 0 5px var(--matrix-green);
+}
+
+@font-face {
+    font-family: 'Matrix-Code';
+    src: url('../assets/Matrix-Code.ttf') format('truetype');
+}
+
+body, html {
+    margin: 0;
+    padding: 0;
+    height: 100%;
+    overflow: hidden;
+    background: var(--background-color);
+    color: var(--matrix-green);
+    font-family: 'Matrix-Code', monospace;
+    text-shadow: var(--text-glow);
+}
+        /* Efecto de monitor antiguo CRT (superposición) */
+body::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: 
+                /* Scanlines más visibles */
+                repeating-linear-gradient(0deg, rgba(0,0,0,.2) 0, rgba(0,0,0,.2) 1px, transparent 1px, transparent 2px),
+                /* Puntos estáticos (ruido) más notables */
+                radial-gradient(circle at center, rgba(0,0,0,0) 0, rgba(0,0,0,.1) 50%, rgba(0,0,0,.3) 100%);
+            background-size: 100% 4px, 100% 100%;
+            background-blend-mode: overlay;
+            pointer-events: none;
+            z-index: 1000;
+            animation: flicker 0.2s infinite alternate;
+}
+
+canvas {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: -1;
+}
+
+#chat-container {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 80%;
+    max-width: 800px;
+    height: 80%;
+    border: 2px solid var(--dark-green);
+    background: rgba(0, 0, 0, 0.75);
+    display: flex;
+    flex-direction: column;
+    backdrop-filter: blur(2px);
+}
+
+#messages {
+    flex-grow: 1;
+    padding: 20px;
+    overflow-y: auto;
+    scrollbar-width: thin;
+    scrollbar-color: var(--dark-green) var(--background-color);
+}
+
+#messages::-webkit-scrollbar {
+    width: 8px;
+}
+
+#messages::-webkit-scrollbar-track {
+    background: var(--background-color);
+}
+
+#messages::-webkit-scrollbar-thumb {
+    background-color: var(--dark-green);
+    border-radius: 4px;
+    border: 1px solid var(--matrix-green);
+}
+
+.message {
+    margin-bottom: 15px;
+    line-height: 1.4;
+}
+
+.message strong {
+    color: var(--matrix-green);
+    text-transform: uppercase;
+}
+
+.thinking-indicator .dot {
+    display: inline-block;
+    width: 5px;
+    height: 5px;
+    background-color: var(--matrix-green);
+    border-radius: 50%;
+    margin-left: 3px;
+    animation: blink 1.4s infinite both;
+}
+
+.thinking-indicator .dot:nth-child(2) {
+    animation-delay: 0.2s;
+}
+
+.thinking-indicator .dot:nth-child(3) {
+    animation-delay: 0.4s;
+}
+
+@keyframes blink {
+    0% { opacity: 0.2; }
+    20% { opacity: 1; }
+    100% { opacity: 0.2; }
+}
+
+#input-container {
+    display: flex;
+    border-top: 2px solid var(--dark-green);
+}
+
+#user-input {
+    flex-grow: 1;
+    background: transparent;
+    border: none;
+    color: var(--matrix-green);
+    padding: 15px;
+    font-family: 'Matrix-Code', monospace;
+    font-size: 1.2em;
+}
+
+#user-input:focus {
+    outline: none;
+    text-shadow: 0 0 8px var(--matrix-green);
+}
+
+#send-button {
+    background: var(--dark-green);
+    color: var(--background-color);
+    border: none;
+    padding: 0 25px;
+    cursor: pointer;
+    font-family: 'Matrix-Code', monospace;
+    font-size: 1.2em;
+    text-transform: uppercase;
+    transition: background-color 0.3s, text-shadow 0.3s;
+}
+
+#send-button:hover:not(:disabled) {
+    background: var(--matrix-green);
+    text-shadow: 0 0 5px #000;
+}
+
+#send-button:disabled {
+    cursor: not-allowed;
+    opacity: 0.5;
+}
+
+#loader {
+    position: absolute;
+    bottom: 60px; /* Position above input */
+    left: 0;
+    width: 100%;
+    padding: 10px;
+    color: var(--matrix-green);
+    text-align: center;
+}
+
+#progress-bar-container {
+    width: 80%;
+    height: 10px;
+    border: 1px solid var(--matrix-green);
+    margin: 10px auto 0 auto;
+}
+
+#progress-bar {
+    width: 0%;
+    height: 100%;
+    background: var(--matrix-green);
+}

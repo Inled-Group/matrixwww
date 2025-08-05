@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>About Matrix WWW</title>
+    <meta name="description" content="Dive into the world of Matrix with MatrixWWW.">
+    <meta name="keywords" content="Matrix, Neo, código, lluvia de código, interfaz, entrenamiento, salud, simulación, The Matrix, HTML, CSS, JavaScript">
+    <meta name="author" content="Inled Group">
+    <link rel="icon" href="favicon.ico" type="image/x-icon">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        /* Importamos una fuente monoespaciada para simular una terminal */
+        @import url('https://fonts.googleapis.com/css2?family=Roboto+Mono:wght@400;700&display=swap');
+
+        /* Estilos generales del cuerpo */
+        body {
+            background-color: #000;
+            color: #00ff41; /* Verde neón de Matrix */
+            font-family: 'Roboto Mono', monospace;
+            margin: 0;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+/* Efecto de monitor antiguo CRT (superposición) */
+body::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 200vh;
+            background: 
+                /* Scanlines más visibles */
+                repeating-linear-gradient(0deg, rgba(0,0,0,.2) 0, rgba(0,0,0,.2) 1px, transparent 1px, transparent 2px),
+                /* Puntos estáticos (ruido) más notables */
+                radial-gradient(circle at center, rgba(0,0,0,0) 0, rgba(0,0,0,.1) 50%, rgba(0,0,0,.3) 100%);
+            background-size: 100% 4px, 100% 100%;
+            background-blend-mode: overlay;
+            pointer-events: none;
+            z-index: 1000;
+            animation: flicker 0.2s infinite alternate;
+        }
+        /* Estilo para el contenedor del texto que se va a escribir */
+        #output-text {
+            /* Posicionamiento en la esquina superior izquierda */
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            /* Tamaño de fuente pequeño */
+            font-size: 1rem;
+            white-space: pre-wrap; /* Permite saltos de línea */
+            min-height: 20px; /* Evita que el contenedor colapse */
+        }
+        #skip-animation {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background-color: #00ff41;
+            color: #000;
+            border: none;
+            padding: 10px;
+            cursor: pointer;
+            font-family: 'Roboto Mono', monospace;
+            box-shadow: 0 0 10px #00ff41, 0 0 20px #00ff41;
+            z-index: 1001;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Contenedor donde se mostrará el texto escrito a máquina -->
+    <div id="output-text"></div>
+    <button id="skip-animation">Skip Animation</button>
+
+    <!-- 
+        Las frases se definen aquí en el HTML. 
+        Puedes añadir o editar estas líneas para cambiar el texto.
+    -->
+    <div id="phrases-container" style="display: none;">
+        <span>Welcome to the Matrix WWW</span>
+        <span>In the Matrix WWW you can access resources based on the Matrix universe, especially in the computer universe.</span>
+        <span>__________________</span>
+        <span>The Code Rain</span>
+        <span>___________________</span>
+        <span>Matrix WWW offers the Matrix Code Rain feature and includes an Easter Egg... Did you know you can expand the code and access the next portal by double-clicking?</span>
+        <span>__________________</span>
+        <span>Neos's Health Check</span>
+        <span>___________________</span>
+        <span>The Matrix WWW includes Neo's health status interface, with alpha waves and pulses. It also includes a built-in terminal that displays the output of the Matrix program.</span>
+        <span>__________________</span>
+        <span>Training Interface</span>
+        <span>___________________</span>
+        <span>Did you know that you can download training programs for Neo on the Matrix WWW? <br>
+            Also, there's a very special program that doesn't appear in the trilogy but does appear in a Matrix YTP... See if you can find it!</span>
+        <span>__________________</span>
+        <span>Neo's Computer</span>
+        <span>___________________</span>
+        <span>Did you know you can see Neo's computer screen in the Matrix WWW? Yes, you can, and you can access it right at the moment when Trinity hacks his computer and tells him that the Matrix possesses him.</span>
+        <span>__________________</span>
+        <span>License and Author</span>
+        <span>___________________</span>
+        <span>Made by Inled Group with love in Spain</span>
+        <span>Licensed under GNU GPLv3.0</span>
+        <span>Give us a Star on Github, please! :)</span>
+
+
+    </div>
+
+    <script>
+        const outputElement = document.getElementById('output-text');
+        const skipButton = document.getElementById('skip-animation');
+        
+        // Obtenemos las frases directamente del HTML y sus textos
+        const phrases = Array.from(document.querySelectorAll('#phrases-container span')).map(span => span.textContent);
+
+        let phraseIndex = 0;
+        let charIndex = 0;
+        let typingSpeed = 75; // Velocidad de escritura en ms
+        let pauseBetweenPhrases = 1500; // Pausa entre frases en ms
+        let animationSkipped = false;
+
+        /**
+         * Función principal que maneja el efecto de máquina de escribir.
+         * Se llama a sí misma de forma recursiva con un retraso.
+         */
+        function typeWriter() {
+            // Si se saltó la animación o ya no hay más frases, detenemos la función
+            if (animationSkipped || phraseIndex >= phrases.length) {
+                return;
+            }
+
+            const currentPhrase = phrases[phraseIndex];
+            
+            // Modo de escritura: añade un carácter
+            if (charIndex < currentPhrase.length) {
+                outputElement.textContent += currentPhrase.charAt(charIndex);
+                charIndex++;
+                setTimeout(typeWriter, typingSpeed);
+            } else {
+                // Pausa cuando se termina de escribir la frase
+                outputElement.textContent += '\n\n'; // Añade una nueva línea para la siguiente frase
+                charIndex = 0;
+                phraseIndex++;
+                setTimeout(typeWriter, pauseBetweenPhrases);
+            }
+        }
+
+        // Espera a que el documento esté completamente cargado para iniciar el efecto
+        document.addEventListener('DOMContentLoaded', () => {
+            if (outputElement && phrases.length > 0) {
+                setTimeout(typeWriter, 1000); // Empieza después de un segundo
+            }
+        });
+
+        skipButton.addEventListener('click', () => {
+            animationSkipped = true;
+            skipButton.style.display = 'none';
+            outputElement.textContent = phrases.join('\n\n');
+        });
+    </script>
+
+</body>
+</html>

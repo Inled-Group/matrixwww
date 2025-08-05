@@ -1,0 +1,8 @@
+{
+  "name": "matrix-chatsmith",
+  "private": true,
+  "version": "0.0.0",
+  "dependencies": {
+    "@mlc-ai/web-llm": "^0.2.45"
+  }
+}

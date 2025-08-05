@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Matrix Code Rain Customizer | Matrix WWW</title>
+	<meta name="description" content="Interface to customize Matrix Code Rain based on the best Matrix code simulation.">
+    <meta name="keywords" content="Matrix, Neo, código, lluvia de código, interfaz, entrenamiento, salud, simulación, The Matrix, HTML, CSS, JavaScript">
+    <meta name="author" content="Inled Group">
+    <link rel="icon" href="favicon.ico" type="image/x-icon">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Roboto+Mono:wght@400;700&display=swap');
+        body {
+            background-color: #000;
+            color: #00ff41;
+            font-family: 'Roboto Mono', monospace;
+            margin: 0;
+            padding: 1em;
+            display: flex;
+            height: 100vh;
+            box-sizing: border-box;
+        }
+        body::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100vh;
+            background: repeating-linear-gradient(0deg, rgba(0,0,0,.2) 0, rgba(0,0,0,.2) 1px, transparent 1px, transparent 2px);
+            pointer-events: none;
+            z-index: 1000;
+        }
+        #controls {
+            width: 350px;
+            height: 100%;
+            overflow-y: auto;
+            padding-right: 20px;
+            border-right: 1px solid #00ff41;
+        }
+        #preview {
+            flex-grow: 1;
+            height: 100%;
+            padding-left: 20px;
+        }
+        iframe {
+            width: 100%;
+            height: 100%;
+            border: 1px solid #00ff41;
+            box-shadow: 0 0 10px #00ff41;
+        }
+        .control-group {
+            margin-bottom: 1em;
+        }
+        label {
+            display: block;
+            margin-bottom: 0.5em;
+            font-weight: bold;
+        }
+        input, select, button {
+            width: 100%;
+            background-color: #0d0d0d;
+            color: #00ff41;
+            border: 1px solid #00ff41;
+            padding: 8px;
+            box-sizing: border-box;
+            font-family: 'Roboto Mono', monospace;
+        }
+        input[type="range"] {
+            -webkit-appearance: none; /* Hides the slider so that custom slider can be designed */
+            width: 100%; /* Specific width is required for Firefox. */
+            background: transparent; /* Otherwise white in Chrome */
+            padding: 0;
+        }
+
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            border: 1px solid #00ff41;
+            height: 16px;
+            width: 16px;
+            border-radius: 3px;
+            background: #00ff41;
+            cursor: pointer;
+            margin-top: -5px; /* You need to specify a margin in Chrome, but in Firefox and IE it is automatic */
+            box-shadow: 0 0 5px #00ff41;
+        }
+
+        input[type="range"]::-moz-range-thumb {
+            border: 1px solid #00ff41;
+            height: 16px;
+            width: 16px;
+            border-radius: 3px;
+            background: #00ff41;
+            cursor: pointer;
+            box-shadow: 0 0 5px #00ff41;
+        }
+
+        input[type="range"]::-webkit-slider-runnable-track {
+            width: 100%;
+            height: 6px;
+            cursor: pointer;
+            background: #0d0d0d;
+            border-radius: 3px;
+            border: 1px solid #00ff41;
+            box-shadow: 0 0 5px #00ff41;
+        }
+
+        input[type="range"]::-moz-range-track {
+            width: 100%;
+            height: 6px;
+            cursor: pointer;
+            background: #0d0d0d;
+            border-radius: 3px;
+            border: 1px solid #00ff41;
+            box-shadow: 0 0 5px #00ff41;
+        }
+        button {
+            background-color: #00ff41;
+            color: #000;
+            cursor: pointer;
+            font-weight: bold;
+            margin-top: 1em;
+            box-shadow: 0 0 5px #00ff41;
+        }
+        h2 {
+            color: #00ff41;
+            text-shadow: 0 0 5px #00ff41;
+        }
+    </style>
+</head>
+<body>
+
+    <div id="controls">
+        <h2>Customize Matrix Code Rain</h2>
+        <form id="customization-form">
+            <div class="control-group">
+                <label for="version">Version</label>
+                <select id="version" name="version">
+                    <option value="classic">Classic</option>
+                    <option value="3d">3D</option>
+                    <option value="megacity">Megacity</option>
+                    <option value="operator">Operator</option>
+                    <option value="nightmare">Nightmare</option>
+                    <option value="paradise">Paradise</option>
+                    <option value="resurrections">Resurrections</option>
+                    <option value="palimpsest">Palimpsest</option>
+                </select>
+            </div>
+
+            <div class="control-group">
+                <label for="font">Font</label>
+                <select id="font" name="font">
+                    <option value="matrixcode">Matrix Code</option>
+                    <option value="resurrections">Resurrections</option>
+                    <option value="gothic">Gothic</option>
+                    <option value="coptic">Coptic</option>
+                    <option value="huberfishA">Huberfish A</option>
+                    <option value="huberfishD">Huberfish D</option>
+                </select>
+            </div>
+
+            <div class="control-group">
+                <label for="numColumns">Columns: <span id="numColumnsValue">60</span></label>
+                <input type="range" id="numColumns" name="numColumns" min="10" max="200" value="60">
+            </div>
+
+            <div class="control-group">
+                <label for="fallSpeed">Fall Speed: <span id="fallSpeedValue">0.4</span></label>
+                <input type="range" id="fallSpeed" name="fallSpeed" min="-2" max="2" value="0.4" step="0.1">
+            </div>
+            
+            <div class="control-group">
+                <label for="slant">Slant: <span id="slantValue">0</span>°</label>
+                <input type="range" id="slant" name="slant" min="-45" max="45" value="0">
+            </div>
+
+            <div class="control-group">
+                <label for="bloomSize">Bloom Size: <span id="bloomSizeValue">0.4</span></label>
+                <input type="range" id="bloomSize" name="bloomSize" min="0" max="1" value="0.4" step="0.01">
+            </div>
+
+            <div class="control-group">
+                <label for="effect">Effect</label>
+                <select id="effect" name="effect">
+                    <option value="plain">Plain</option>
+                    <option value="pride">Children's rainbow</option>
+                    <option value="none">None (Debug)</option>
+                    <option value="image">Image</option>
+                    <option value="mirror">Mirror</option>
+                </select>
+            </div>
+
+            <div class="control-group">
+                <label for="url">Image URL (for Image effect)</label>
+                <input type="text" id="url" name="url" placeholder="https://upload.wikimedia.org/wikipedia/commons/f/f5/EagleRock.jpg">
+            </div>
+
+            <button type="button" id="update-button">Update Rain</button>
+            <button type="button" id="reset-button">Reset</button>
+            <button type="button" id="fullscreen-button">Full Screen</button>
+        </form>
+    </div>
+
+    <div id="preview">
+        <iframe id="rain-frame" src="https://rezmason.github.io/matrix/?"></iframe>
+    </div>
+
+    <script>
+        const form = document.getElementById('customization-form');
+        const updateButton = document.getElementById('update-button');
+        const resetButton = document.getElementById('reset-button');
+        const fullscreenButton = document.getElementById('fullscreen-button');
+        const rainFrame = document.getElementById('rain-frame');
+        const baseUrl = 'https://rezmason.github.io/matrix/';
+
+        const initialValues = {
+            version: 'classic',
+            font: 'matrixcode',
+            numColumns: '60',
+            fallSpeed: '0.4',
+            slant: '0',
+            bloomSize: '0.4',
+            effect: 'plain',
+            url: ''
+        };
+
+        const sliders = [
+            { id: 'numColumns', valueId: 'numColumnsValue' },
+            { id: 'fallSpeed', valueId: 'fallSpeedValue' },
+            { id: 'slant', valueId: 'slantValue' },
+            { id: 'bloomSize', valueId: 'bloomSizeValue' }
+        ];
+
+        sliders.forEach(slider => {
+            const input = document.getElementById(slider.id);
+            const valueSpan = document.getElementById(slider.valueId);
+            input.addEventListener('input', () => {
+                valueSpan.textContent = input.value;
+            });
+        });
+
+        function updateRain() {
+            const params = new URLSearchParams();
+            const formData = new FormData(form);
+
+            for (const [key, value] of formData.entries()) {
+                if (value) {
+                    params.set(key, value);
+                }
+            }
+            
+            rainFrame.src = baseUrl + '?' + params.toString();
+        }
+
+        function resetForm() {
+            for (const key in initialValues) {
+                const element = document.getElementById(key);
+                if (element) {
+                    element.value = initialValues[key];
+                    const valueSpan = document.getElementById(key + 'Value');
+                    if (valueSpan) {
+                        valueSpan.textContent = initialValues[key];
+                    }
+                }
+            }
+            updateRain();
+        }
+
+        updateButton.addEventListener('click', updateRain);
+        resetButton.addEventListener('click', resetForm);
+        fullscreenButton.addEventListener('click', () => {
+            window.open(rainFrame.src, '_blank');
+        });
+
+        // Initial load
+        updateRain();
+    </script>
+
+</body>
+</html>

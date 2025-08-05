@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Matrix Code | Matrix WWW</title>
+    <meta name="description" content="Simulation of Matrix Rain Code.">
+    <meta name="keywords" content="Matrix, Neo, código, lluvia de código, interfaz, entrenamiento, salud, simulación, The Matrix, HTML, CSS, JavaScript">
+    <meta name="author" content="Inled Group">
+    <link rel="icon" href="favicon.ico" type="image/x-icon">
+    <style>
+        /* Estilos CSS para el cuerpo y el lienzo */
+        body, html {
+            margin: 0;
+            padding: 0;
+            height: 100%;
+            overflow: hidden;
+            background-color: #000;
+        }
+
+        canvas {
+            display: block;
+        }
+    </style>
+</head>
+<body>
+    <canvas id="matrixCanvas"></canvas>
+    <script>
+        // --- Configuración del Lienzo ---
+        const canvas = document.getElementById('matrixCanvas');
+        const ctx = canvas.getContext('2d');
+
+        // Establecer el tamaño del lienzo para que llene la ventana
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+
+        let ripples = []; // Almacenará las ondas de click
+
+        // --- Clase para la Onda Expansiva ---
+        class Ripple {
+            constructor(x, y) {
+                this.x = x;
+                this.y = y;
+                this.radius = 0; // El "radio" del cuadrado expansivo
+                this.maxRadius = 200; // Tamaño máximo
+                this.speed = 7;
+                this.life = 1; // Opacidad
+                this.fadeSpeed = 0.015;
+            }
+
+            // Actualiza el estado de la onda (tamaño y opacidad)
+            update() {
+                this.radius += this.speed;
+                if (this.life > 0) {
+                    this.life -= this.fadeSpeed;
+                }
+            }
+
+            // Dibuja la onda en el lienzo
+            draw(context) {
+                if (this.life > 0) {
+                    const size = this.radius * 2;
+                    const cornerX = this.x - this.radius;
+                    const cornerY = this.y - this.radius;
+
+                    // Dibuja un cuadrado negro para "limpiar" el código detrás
+                    context.fillStyle = 'rgba(0, 0, 0, 1)';
+                    context.fillRect(cornerX, cornerY, size, size);
+                    
+                    // Dibuja el borde brillante de la onda
+                    context.strokeStyle = `rgba(200, 255, 200, ${this.life})`;
+                    context.lineWidth = 2;
+                    context.shadowBlur = 15;
+                    context.shadowColor = `rgba(100, 255, 100, ${this.life})`;
+                    context.strokeRect(cornerX, cornerY, size, size);
+
+                    // Restablece el efecto de sombra para no afectar otros dibujos
+                    context.shadowBlur = 0;
+                }
+            }
+        }
+
+        // --- Símbolos y Corrientes de Código ---
+        class Symbol {
+            constructor(x, y, fontSize, canvasHeight) {
+                this.characters = 'アァカサタナハマヤャラワガザダバパイィキシチニヒミリヰギジヂビピウゥクスツヌフムユュルグズブヅプエェケセテネヘメレヱゲゼデベペオォコソトノホモヨョロヲゴゾドボポヴッンABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+                this.x = x;
+                this.y = y;
+                this.fontSize = fontSize;
+                this.text = '';
+                this.canvasHeight = canvasHeight;
+            }
+
+            draw(context) {
+                this.text = this.characters.charAt(Math.floor(Math.random() * this.characters.length));
+                context.fillText(this.text, this.x * this.fontSize, this.y * this.fontSize);
+                
+                if (this.y * this.fontSize > this.canvasHeight && Math.random() > 0.98) {
+                    this.y = 0;
+                } else {
+                    this.y += 1;
+                }
+            }
+        }
+
+        class Effect {
+            constructor(canvasWidth, canvasHeight) {
+                this.canvasWidth = canvasWidth;
+                this.canvasHeight = canvasHeight;
+                this.fontSize = 25;
+                this.columns = Math.floor(this.canvasWidth / this.fontSize);
+                this.symbols = [];
+                this.#initialize();
+            }
+
+            #initialize() {
+                for (let i = 0; i < this.columns; i++) {
+                    this.symbols[i] = new Symbol(i, 0 - Math.random() * this.canvasHeight, this.fontSize, this.canvasHeight);
+                }
+            }
+
+            resize(width, height) {
+                this.canvasWidth = width;
+                this.canvasHeight = height;
+                this.columns = Math.floor(this.canvasWidth / this.fontSize);
+                this.symbols = [];
+                this.#initialize();
+            }
+        }
+
+        const effect = new Effect(canvas.width, canvas.height);
+        let lastTime = 0;
+        const fps = 30;
+        const nextFrame = 1000 / fps;
+        let timer = 0;
+
+        // --- Bucle de Animación ---
+        function animate(timeStamp) {
+            const deltaTime = timeStamp - lastTime;
+            lastTime = timeStamp;
+
+            if (timer > nextFrame) {
+                // Dibuja un rectángulo semi-transparente para crear el efecto de estela
+                ctx.fillStyle = 'rgba(0, 0, 0, 0.05)';
+                ctx.textAlign = 'center';
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+                
+                // Dibuja los símbolos de la lluvia de código
+                ctx.font = effect.fontSize + 'px monospace';
+                ctx.fillStyle = '#0aff04';
+                effect.symbols.forEach(symbol => symbol.draw(ctx));
+
+                // Dibuja las ondas de click
+                ripples.forEach((ripple, index) => {
+                    ripple.update();
+                    ripple.draw(ctx);
+                    if (ripple.life <= 0) {
+                        ripples.splice(index, 1); // Elimina las ondas que ya se desvanecieron
+                    }
+                });
+
+                timer = 0;
+            } else {
+                timer += deltaTime;
+            }
+            
+            requestAnimationFrame(animate);
+        }
+        
+        animate(0);
+
+        // --- Manejadores de Eventos ---
+        window.addEventListener('click', (event) => {
+            ripples.push(new Ripple(event.clientX, event.clientY));
+        });
+
+        window.addEventListener('resize', () => {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+            effect.resize(canvas.width, canvas.height);
+            ripples = []; // Limpia las ondas al redimensionar
+        });
+    </script>
+</body>
+</html>

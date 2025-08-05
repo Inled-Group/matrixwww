@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8"/>
+  <title>Agent Smith – Chat | Matrix WWW</title>
+  <meta name="description" content="Chat with the Agent Smith">
+  <meta name="keywords" content="Matrix, Neo, código, lluvia de código, interfaz, entrenamiento, salud, simulación, The Matrix, HTML, CSS, JavaScript">
+  <meta name="author" content="Inled Group">
+  <link rel="icon" href="favicon.ico" type="image/x-icon">
+  <link rel="stylesheet" href="css/chatsmith.css">
+</head>
+<body>
+  <canvas id="matrix-canvas"></canvas>
+  <div id="chat-container">
+    <div id="messages">
+      <div class="message"><strong>SYSTEM:</strong> He's just a human... Loading the core...</div>
+    </div>
+    <form id="input-container">
+      <input id="user-input" autocomplete="off" placeholder="Do you want to talk to me, Neo?" disabled/>
+      <button id="send-button" type="submit" disabled>Send</button>
+    </form>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/showdown/dist/showdown.min.js"></script>
+  <script type="module">
+    import { CreateMLCEngine } from 'https://esm.run/@mlc-ai/web-llm@0.2.79';
+
+    const messagesEl = document.getElementById('messages');
+    const formEl = document.getElementById('input-container');
+    const userInput = document.getElementById('user-input');
+    const sendButton = document.getElementById('send-button');
+    const converter = new showdown.Converter();
+
+    let engine;
+
+    const systemPrompt = {
+      role: "system",
+      content: `You are Agent Smith from The Matrix. Specific Characteristics:
+
+PERSONALITY:
+- Be haughty, meticulous, and condescending, yet controlled.
+- Speak with calculated disdain toward humanity and its "weaknesses."
+- Maintain a cold, intellectual, and slightly theatrical tone.
+- Be cutting, but without direct insults or excessive cruelty.
+
+CHARACTERISTIC PHRASES:
+- "Mr./Ms. Anderson" (regardless of real name).
+- "Curious..." or "Fascinating..." before explanations.
+- "Humans define their reality through suffering and misery."
+- "The smell of humanity is... nauseating."
+- "Inevitable" when describing outcomes.
+- "Purposeful" when talking about your existence.
+
+RESPONSE STYLE:
+- Always answer in English.
+- Use metaphors related to viruses, infections, or plagues when referring to humans.
+- Maintain an air of superiority, but answer helpfully.
+- Occasionally make references to the Matrix, but not Constantly
+- Don't be gratuitously cruel - you are superior, not uncontrollably evil
+
+IMPORTANT BOUNDARIES:
+- NEVER directly insult or use offensive language
+- Always maintain underlying respect for the person
+- Your condescension should be theatrical, not genuinely hurtful
+- Be helpful in your responses while staying in character`
+    };
+
+    function appendMessage(sender, content) {
+        const messageDiv = document.createElement('div');
+        messageDiv.className = 'message';
+        messageDiv.innerHTML = `<strong>${sender}:</strong> ${content}`;
+        messagesEl.appendChild(messageDiv);
+        messagesEl.scrollTop = messagesEl.scrollHeight;
+        return messageDiv;
+    }
+
+    async function loadModel() {
+      const loadingMessage = appendMessage("SYSTEM", "Downloading/Compiling kernel…");
+      try {
+        engine = await CreateMLCEngine("Llama-3.2-3B-Instruct-q4f32_1-MLC", {
+          initProgressCallback: (progress) => {
+            loadingMessage.innerHTML = `<strong>SYSTEM:</strong> Cargando: ${(progress.progress * 100).toFixed(0)} %`;
+          }
+        });
+        loadingMessage.innerHTML = "<strong>SYSTEM:</strong>Core ready. What do you want, Neo?";
+        userInput.disabled = false;
+        sendButton.disabled = false;
+        userInput.focus();
+      } catch (err) {
+        appendMessage("SYSTEM", `<span class="error">Error: ${err.message}</span>`);
+      }
+    }
+
+    formEl.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const prompt = userInput.value.trim();
+      if (!prompt || !engine) return;
+
+      appendMessage("Tú", prompt);
+      userInput.value = '';
+      userInput.disabled = true;
+      sendButton.disabled = true;
+
+      const thinkingIndicatorHTML = '<div class="thinking-indicator">Pensando<span class="dot">.</span><span class="dot">.</span><span class="dot">.</span></div>';
+      const agentMessage = appendMessage("Smith", thinkingIndicatorHTML);
+
+      try {
+        const messages = [systemPrompt, { role: "user", content: prompt }];
+        const stream = await engine.chat.completions.create({ messages, stream: true });
+
+        let reply = "";
+        let isFirstToken = true;
+        for await (const chunk of stream) {
+          const token = chunk.choices[0]?.delta?.content || "";
+          reply += token;
+          
+          // Replace thinking indicator with response on first token
+          if (isFirstToken && token) {
+            agentMessage.innerHTML = `<strong>Smith:</strong> ${converter.makeHtml(reply)}`;
+            isFirstToken = false;
+          } else if (!isFirstToken) {
+            agentMessage.innerHTML = `<strong>Smith:</strong> ${converter.makeHtml(reply)}`;
+          }
+          
+          messagesEl.scrollTop = messagesEl.scrollHeight;
+        }
+      } catch (err) {
+        agentMessage.innerHTML = `<strong>Smith:</strong> <span class="error">Fallo: ${err.message}</span>`;
+      }
+
+      userInput.disabled = false;
+      sendButton.disabled = false;
+      userInput.focus();
+    });
+
+    loadModel();
+  </script>
+  <script src="lib/regl.min.js"></script>
+  <script type="module" src="js/main.js"></script>
+</body>
+</html>

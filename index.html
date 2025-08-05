@@ -1,109 +1,266 @@
-<!doctype html>
-<html>
-	<head>
-		<title>Matrix digital rain</title>
-		<meta charset="utf-8" />
-		<meta name="apple-mobile-web-app-capable" content="yes" />
-		<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
-		<meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0, viewport-fit=cover" />
-		<style>
-			@supports (padding-top: env(safe-area-inset-top)) {
-				body {
-					padding: 0;
-					height: calc(100% + env(safe-area-inset-top));
-				}
-			}
-			body {
-				background: black;
-				overflow: hidden;
-				margin: 0;
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="description" content="Dive into the world of Matrix with MatrixWWW.">
+    <meta name="keywords" content="Matrix, Neo, código, lluvia de código, interfaz, entrenamiento, salud, simulación, The Matrix, HTML, CSS, JavaScript">
+    <meta name="author" content="Inled Group">
+    <link rel="icon" href="favicon.ico" type="image/x-icon">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Matrix WWW</title>
+    <style>
+        /* Estilos CSS para el cuerpo y el lienzo */
+        body, html {
+            margin: 0;
+            padding: 0;
+            height: 100%;
+            overflow: hidden;
+            background-color: #000;
+        }
+        /* Efecto de monitor antiguo CRT (superposición) */
+        body::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: 
+                /* Scanlines más visibles */
+                repeating-linear-gradient(0deg, rgba(0,0,0,.2) 0, rgba(0,0,0,.2) 1px, transparent 1px, transparent 2px),
+                /* Puntos estáticos (ruido) más notables */
+                radial-gradient(circle at center, rgba(0,0,0,0) 0, rgba(0,0,0,.1) 50%, rgba(0,0,0,.3) 100%);
+            background-size: 100% 4px, 100% 100%;
+            background-blend-mode: overlay;
+            pointer-events: none;
+            z-index: 1000;
+            animation: flicker 0.2s infinite alternate;
+        }
 
-				font-family: monospace;
-				font-size: 2em;
-				text-align: center;
-			}
+        canvas {
+            display: block;
+            position: absolute;
+            top: 0;
+            left: 0;
+            z-index: 1; /* El lienzo de la lluvia de código estará en la capa inferior */
+        }
 
-			canvas {
-				width: 100vw;
-				height: 100vh;
-			}
+        /* Contenedor del contenido principal */
+        .content-container {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 2; /* El contenido estará en la capa superior */
+            text-align: center;
+            color: #0aff04;
+            font-family: 'monospace', 'Courier New', Courier;
+            text-shadow: 0 0 5px #0aff04, 0 0 10px #0aff04;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
+            box-sizing: border-box;
+            max-width: 90%;
+        }
 
-			p {
-				color: hsl(108, 90%, 70%);
-				text-shadow: hsl(108, 90%, 40%) 1px 0 10px;
-			}
+        /* Estilos para el título y la lista */
+        h1 {
+            font-size: 3rem;
+            margin-bottom: 20px;
+            white-space: nowrap; /* Evita que el texto se divida en varias líneas */
+            overflow: hidden; /* Oculta el texto que se está "escribiendo" */
+            border-right: 2px solid #0aff04; /* Cursor que parpadea */
+            animation: typing 2s steps(40, end), blink-caret .75s step-end infinite;
+        }
 
-			.notice {
-				margin-top: 10em;
-				animation: fadeInAnimation ease 3s;
-				animation-iteration-count: 1;
-				animation-fill-mode: forwards;
-			}
+        ul {
+            list-style: none;
+            padding: 0;
+            opacity: 0; /* Oculta la lista al inicio */
+            transition: opacity 1s ease-in-out;
+        }
 
-			@keyframes fadeInAnimation {
-				0% {
-					opacity: 0;
-				}
-				100% {
-					opacity: 1;
-				}
-			}
+        ul.visible {
+            opacity: 1;
+        }
 
-			.pill {
-				display: inline-block;
-				background: gray;
-				border: 0.3em solid lightgray;
-				font-size: 1rem;
-				font-family: monospace;
-				color: white;
-				padding: 0.5em 1em;
-				border-radius: 2em;
-				min-width: 6rem;
-				margin: 3em;
-				text-decoration: none;
-				cursor: pointer;
-				text-transform: uppercase;
-				font-weight: bold;
-			}
+        li {
+            margin: 10px 0;
+            font-size: 1.5rem;
+            /* La animación de "typing-list" establecerá el ancho */
+            width: 0;
+            overflow: hidden;
+            white-space: nowrap;
+            /* La animación de cada enlace se retrasa para que aparezcan uno por uno */
+            animation: typing-list 1s steps(20, end) forwards;
+        }
 
-			.blue {
-				background: linear-gradient(skyblue, blue, black, black, darkblue);
-				border-color: darkblue;
-				color: lightblue;
-			}
+        li a {
+            color: #0aff04;
+            text-decoration: none;
+            text-shadow: 0 0 3px #0aff04;
+            position: relative;
+            transition: color 0.3s ease;
+        }
 
-			.blue:hover {
-				border-color: blue;
-				color: white;
-			}
+        li a:hover {
+            color: #00ff00;
+        }
+        
+        li a::before {
+            content: '[';
+            color: #0aff04;
+            opacity: 0.7;
+            margin-right: 5px;
+        }
+        
+        li a::after {
+            content: ']';
+            color: #0aff04;
+            opacity: 0.7;
+            margin-left: 5px;
+        }
 
-			.red {
-				background: linear-gradient(lightpink, crimson, black, black, darkred);
-				border-color: darkred;
-				color: lightpink;
-			}
+        /* Animación del efecto de máquina de escribir para el título */
+        @keyframes typing {
+            from { width: 0 }
+            to { width: 100% }
+        }
 
-			.red:hover {
-				border-color: crimson;
-				color: white;
-			}
-		</style>
-	</head>
-	<body>
-		<!--
-			This is an implementation of the green code seen in The Matrix film and video game franchise.
-			This project demonstrates five concepts:
-					1. Drawing to floating point frame buffer objects, or 'FBO's,
-						 for performing computation and post-processing
-					2. GPU-side computation, with fragment shaders
-						 updating two alternating FBOs
-					3. Rendering crisp "vector" graphics, with a multiple-channel
-						 signed distance field (or 'MSDF')
-					4. Creating a blur/bloom effect from a texture pyramid
-					5. Color mapping with noise, to hide banding
+        /* Animación del efecto de máquina de escribir para la lista */
+        @keyframes typing-list {
+            from { width: 0; }
+            to { width: 100%; }
+        }
 
-			For more information, please visit: https://github.com/Rezmason/matrix
-		 -->
-		<script type="module" src="js/main.js"></script>
-	</body>
+        /* Cursor que parpadea */
+        @keyframes blink-caret {
+            from, to { border-color: transparent }
+            50% { border-color: #0aff04; }
+        }
+    </style>
+</head>
+<body>
+    <canvas id="matrixCanvas"></canvas>
+    
+    <div class="content-container">
+        <!-- El título ahora está completo en el HTML para la animación CSS -->
+        <h1 id="welcome-title">Welcome to the Matrix WWW</h1>
+        <ul id="link-list">
+            <li style="animation-delay: 2.5s;"><a href="betterain.html" target="_blank">Matrix Code Rain Customizer</a></li>
+            <li style="animation-delay: 4s;"><a href="health.html" target="_blank">Neo's Health Check</a></li>
+            <li style="animation-delay: 6s;"><a href="training.html" target="_blank">Training Interface</a></li>
+            <li style="animation-delay: 8s;"><a href="neoscomputer.html" target="_blank">Neo's Computer</a></li>
+            <li style="animation-delay: 10s;"><a href="rain.html" target="_blank">Matrix Basic Code Rain (Made by AI)</a></li>
+            <li style="animation-delay: 12s;"><a href="chatsmith.html" target="_blank">Chat with Agent Smith</a></li>
+            <li style="animation-delay: 14s;"><a href="about.html" target="_blank">About Matrix WWW</a></li>
+        </ul>
+    </div>
+
+    <script>
+        // --- Código de la lluvia de código ---
+        const canvas = document.getElementById('matrixCanvas');
+        const ctx = canvas.getContext('2d');
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+
+        class Symbol {
+            constructor(x, y, fontSize, canvasHeight) {
+                this.characters = 'アァカサタナハマヤャラワガザダバパイィキシチニヒミリヰギジヂビピウゥクスツヌフムユュルグズブヅプエェケセテネヘメレヱゲゼデベペオォコソトノホモヨョロヲゴゾドボポヴッンABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+                this.x = x;
+                this.y = y;
+                this.fontSize = fontSize;
+                this.text = '';
+                this.canvasHeight = canvasHeight;
+            }
+
+            draw(context) {
+                this.text = this.characters.charAt(Math.floor(Math.random() * this.characters.length));
+                context.fillText(this.text, this.x * this.fontSize, this.y * this.fontSize);
+                
+                if (this.y * this.fontSize > this.canvasHeight && Math.random() > 0.98) {
+                    this.y = 0;
+                } else {
+                    this.y += 1;
+                }
+            }
+        }
+
+        class Effect {
+            constructor(canvasWidth, canvasHeight) {
+                this.canvasWidth = canvasWidth;
+                this.canvasHeight = canvasHeight;
+                this.fontSize = 25;
+                this.columns = Math.floor(this.canvasWidth / this.fontSize);
+                this.symbols = [];
+                this.#initialize();
+            }
+
+            #initialize() {
+                for (let i = 0; i < this.columns; i++) {
+                    this.symbols[i] = new Symbol(i, 0 - Math.random() * this.canvasHeight, this.fontSize, this.canvasHeight);
+                }
+            }
+
+            resize(width, height) {
+                this.canvasWidth = width;
+                this.canvasHeight = height;
+                this.columns = Math.floor(this.canvasWidth / this.fontSize);
+                this.symbols = [];
+                this.#initialize();
+            }
+        }
+
+        const effect = new Effect(canvas.width, canvas.height);
+        let lastTime = 0;
+        const fps = 30;
+        const nextFrame = 1000 / fps;
+        let timer = 0;
+        let animationId; // Variable para almacenar el ID de la animación
+
+        function animate(timeStamp) {
+            const deltaTime = timeStamp - lastTime;
+            lastTime = timeStamp;
+
+            if (timer > nextFrame) {
+                ctx.fillStyle = 'rgba(0, 0, 0, 0.05)';
+                ctx.textAlign = 'center';
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+                
+                ctx.font = effect.fontSize + 'px monospace';
+                ctx.fillStyle = '#0aff04';
+                effect.symbols.forEach(symbol => symbol.draw(ctx));
+
+                timer = 0;
+            } else {
+                timer += deltaTime;
+            }
+            
+            animationId = requestAnimationFrame(animate);
+        }
+        
+        animate(0);
+
+        // Detiene la animación de la lluvia de código después de 10 segundos
+        setTimeout(() => {
+            cancelAnimationFrame(animationId);
+            // Opcional: limpiar la pantalla o hacer un efecto de "fade out" si se desea
+            ctx.clearRect(0, 0, canvas.width, canvas.height); 
+        }, 10000);
+
+        window.addEventListener('resize', () => {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+            effect.resize(canvas.width, canvas.height);
+        });
+
+        // --- Mostrar la lista de enlaces después de que termine la animación del título ---
+        // El título tiene una animación de 2s. La lista se muestra con un retraso de 2.5s.
+        setTimeout(() => {
+            const linkList = document.getElementById('link-list');
+            linkList.classList.add('visible');
+        }, 2500); 
+    </script>
+</body>
 </html>

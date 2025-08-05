@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Training | Matrix WWW</title>
+    <meta name="description" content="Simulation of Matrix Training Interface.">
+    <meta name="keywords" content="Matrix, Neo, código, lluvia de código, interfaz, entrenamiento, salud, simulación, The Matrix, HTML, CSS, JavaScript">
+    <meta name="author" content="Inled Group">
+    <link rel="icon" href="favicon.ico" type="image/x-icon">
+    <!-- Tailwind CSS CDN para un estilo moderno y responsivo -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* Importamos una fuente retro estilo terminal */
+        @import url('https://fonts.googleapis.com/css2?family=VT323&display=swap');
+
+        /* Estilos personalizados para la interfaz de Matrix */
+        :root {
+            --dark-blue: #00122e; /* Un azul muy oscuro para el fondo */
+            --light-blue: #003366; /* Un azul ligeramente más claro para el panel */
+            --accent-blue: #00ffff; /* Un azul cian brillante para los acentos */
+            --glow-color: #00ffff;
+        }
+
+        body {
+            font-family: 'VT323', monospace;
+            background-color: var(--dark-blue);
+            color: var(--accent-blue);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            overflow: hidden;
+            flex-direction: column;
+            gap: 2rem;
+            position: relative;
+        }
+
+        /* Efecto de monitor antiguo CRT (superposición) */
+        body::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: 
+                /* Scanlines más visibles */
+                repeating-linear-gradient(0deg, rgba(0,0,0,.2) 0, rgba(0,0,0,.2) 1px, transparent 1px, transparent 2px),
+                /* Puntos estáticos (ruido) más notables */
+                radial-gradient(circle at center, rgba(0,0,0,0) 0, rgba(0,0,0,.1) 50%, rgba(0,0,0,.3) 100%);
+            background-size: 100% 4px, 100% 100%;
+            background-blend-mode: overlay;
+            pointer-events: none;
+            z-index: 1000;
+            animation: flicker 0.2s infinite alternate;
+        }
+        
+        /* Animación de parpadeo más pronunciada */
+        @keyframes flicker {
+            0% { opacity: 0.85; }
+            100% { opacity: 0.95; }
+        }
+
+        .panel {
+            background-color: var(--light-blue);
+            border: 2px solid var(--accent-blue);
+            box-shadow: 0 0 15px var(--glow-color), inset 0 0 10px var(--glow-color);
+            padding: 2rem;
+            /* Mantenemos los bordes cuadrados */
+            border-radius: 0;
+            max-width: 90vw;
+            z-index: 1; /* Para que esté por encima de la superposición del body */
+        }
+
+        .glow-text {
+            text-shadow: 0 0 5px var(--glow-color), 0 0 10px var(--glow-color);
+        }
+
+        .button-glow {
+            transition: all 0.3s ease;
+        }
+        .button-glow:hover {
+            box-shadow: 0 0 10px var(--glow-color), 0 0 20px var(--glow-color);
+        }
+
+        /* Barra de progreso */
+        .progress-container {
+            width: 100%;
+            height: 20px;
+            background-color: #333;
+            border: 2px solid var(--glow-color);
+            /* Mantenemos los bordes cuadrados */
+            border-radius: 0;
+            overflow: hidden;
+        }
+        .progress-bar {
+            height: 100%;
+            width: 0%;
+            background-color: var(--glow-color);
+            transition: width 0.3s linear;
+        }
+
+        /* Estilo para los botones cuadrados */
+        .number-button {
+            border-radius: 0;
+        }
+
+        .active-skill {
+            background-color: var(--accent-blue);
+            color: var(--dark-blue);
+            box-shadow: 0 0 10px var(--glow-color);
+        }
+    </style>
+</head>
+<body class="flex justify-center items-center h-screen overflow-hidden">
+    <!-- Contenedor principal de la interfaz, con efecto de resplandor -->
+    <div class="panel p-8 md:p-12">
+        <!-- Barra de progreso superior -->
+        <div class="mb-8">
+            <div class="progress-container">
+                <div id="progressBar" class="progress-bar"></div>
+            </div>
+        </div>
+
+        <!-- Secciones de control principales -->
+        <div class="flex flex-col md:flex-row items-center justify-center gap-8 md:gap-16">
+            <!-- Botón de Cargar -->
+            <button id="loadButton" class="bg-light-blue text-white font-bold py-4 px-16 text-2xl uppercase button-glow transition-all duration-300 transform active:scale-95 glow-text">
+                UPLOAD
+            </button>
+        </div>
+
+        <!-- Caja de mensajes personalizada (en lugar de alert()) -->
+        <div id="statusMessage" class="mt-8 text-center text-lg font-bold glow-text min-h-[40px]">
+            <!-- Mensajes de estado aparecerán aquí -->
+            <span id="statusText">SELECT A PROGRAM.</span>
+        </div>
+
+        <!-- Contenedor para los botones numerados -->
+        <div class="mt-8 flex justify-center gap-4">
+            <!-- Botones numerados 1-6 -->
+            <button class="number-button bg-transparent border-2 border-accent-blue text-accent-blue font-bold w-12 h-12 flex items-center justify-center button-glow transform active:scale-90" data-number="1">1</button>
+            <button class="number-button bg-transparent border-2 border-accent-blue text-accent-blue font-bold w-12 h-12 flex items-center justify-center button-glow transform active:scale-90" data-number="2">2</button>
+            <button class="number-button bg-transparent border-2 border-accent-blue text-accent-blue font-bold w-12 h-12 flex items-center justify-center button-glow transform active:scale-90" data-number="3">3</button>
+            <button class="number-button bg-transparent border-2 border-accent-blue text-accent-blue font-bold w-12 h-12 flex items-center justify-center button-glow transform active:scale-90" data-number="4">4</button>
+            <button class="number-button bg-transparent border-2 border-accent-blue text-accent-blue font-bold w-12 h-12 flex items-center justify-center button-glow transform active:scale-90" data-number="5">5</button>
+            <button class="number-button bg-transparent border-2 border-accent-blue text-accent-blue font-bold w-12 h-12 flex items-center justify-center button-glow transform active:scale-90" data-number="6">6</button>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const loadButton = document.getElementById('loadButton');
+            const progressBar = document.getElementById('progressBar');
+            const statusText = document.getElementById('statusText');
+            const numberButtons = document.querySelectorAll('.number-button');
+            
+            // Array de habilidades en inglés para simular la carga
+            const skills = ["KUNG FU", "JIUJITSU", "BOXING", "FUJITSU", "KARATE", "SMITH FIGHT"];
+            let selectedSkillIndex = -1;
+
+            // Evento para los botones numerados
+            numberButtons.forEach(button => {
+                button.addEventListener('click', () => {
+                    // Quita el estilo activo de todos los botones
+                    numberButtons.forEach(btn => btn.classList.remove('active-skill'));
+                    
+                    // Añade el estilo activo al botón clicado
+                    button.classList.add('active-skill');
+                    
+                    // Almacena el índice de la habilidad seleccionada
+                    selectedSkillIndex = parseInt(button.dataset.number) - 1;
+                    
+                    // Muestra un mensaje en la caja de estado
+                    statusText.textContent = `PROGRAM SELECTED: ${skills[selectedSkillIndex]}.`;
+                });
+            });
+
+            // Evento para el botón de cargar
+            loadButton.addEventListener('click', () => {
+                if (loadButton.disabled) {
+                    return;
+                }
+
+                // Verifica si se ha seleccionado una habilidad antes de cargar
+                if (selectedSkillIndex === -1) {
+                    statusText.textContent = "ERROR: SELECT A PROGRAM FIRST.";
+                    return;
+                }
+
+                loadButton.disabled = true;
+                loadButton.textContent = 'UPLOADING...';
+                loadButton.classList.remove('button-glow');
+                loadButton.style.backgroundColor = 'var(--accent-blue)';
+                loadButton.style.color = 'var(--dark-blue)';
+
+                let progress = 0;
+                progressBar.style.width = '0%';
+                statusText.textContent = "PREPARING PROGRAM...";
+
+                const loadInterval = setInterval(() => {
+                    progress += 10;
+                    progressBar.style.width = `${progress}%`;
+                    if (progress >= 100) {
+                        clearInterval(loadInterval);
+                        
+                        setTimeout(() => {
+                            statusText.textContent = `TRAINING COMPLETED. NEO KNOWS ${skills[selectedSkillIndex]}!`;
+                            loadButton.textContent = 'UPLOAD';
+                            loadButton.classList.add('button-glow');
+                            loadButton.style.backgroundColor = '';
+                            loadButton.style.color = '';
+                            loadButton.disabled = false;
+                        }, 500);
+                    } else {
+                        statusText.textContent = `UPLOADING: ${skills[selectedSkillIndex]}...`;
+                    }
+                }, 300);
+            });
+        });
+    </script>
+</body>
+</html>
